@@ -1,4 +1,4 @@
-package br.com.imd.edb2.nataly.tree;
+package br.com.imd.edb2.nataly.datesStructure;
 
 public class Node {
 

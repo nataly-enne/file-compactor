@@ -1,15 +1,14 @@
 package br.com.imd.edb2.nataly.application;
 
-import br.com.imd.edb2.nataly.heap.Heap;
-import br.com.imd.edb2.nataly.tree.Node;
-import br.com.imd.edb2.nataly.main.TBinary;
+
+import br.com.imd.edb2.nataly.datesStructure.Heap;
+import br.com.imd.edb2.nataly.datesStructure.Node;
 
 import java.io.*;
 import java.util.*;
 
 public class Compressor {
 
-    private int oldSize, tableSize, sizeEncoded;
     private Heap heap = new Heap();
     private Map <Integer, Integer> map = new HashMap<>();
     private boolean key = true;
@@ -18,22 +17,10 @@ public class Compressor {
     private String text, message, dictionary;
     private static String tableCode = "";
 
-    public Compressor(String text, String message, String dictionary) throws IOException {
+    public Compressor(String text, String message, String dictionary) {
         this.text = text;
         this.message = message;
         this.dictionary = dictionary;
-    }
-
-    public Map<Character, String> getBinary() {
-        return binary;
-    }
-
-    public Node getTree() {
-        return tree;
-    }
-
-    public Map<Integer, Integer> getMap() {
-        return map;
     }
 
     // Criação do dicionário com tratamento de exceção.
@@ -45,7 +32,6 @@ public class Compressor {
             BufferedInputStream reader = new BufferedInputStream(f);
 
             byte line[] = reader.readAllBytes();
-            oldSize = line.length;
             String file = new String(line, "UTF8");
 
             for (int i = 0; i < file.length(); i++) {
@@ -63,13 +49,7 @@ public class Compressor {
             System.out.println("Invalid param" + e.getMessage());
         }
 
-        map.put(350, 1);
 
-    }
-
-    // Criação da Árvore
-    public void createTree() throws IOException {
-        
         for (Integer i : map.keySet()) {
             Node no = new Node(i, map.get(i));
             heap.insert(no);
@@ -85,7 +65,7 @@ public class Compressor {
             
             Node right = heap.peek();
             heap.remove();
-            tree = new Node(left.getValue().getQuantity() + right.getValue().getQuantity(), left, right);
+            tree = new Node(left.getQuantity() + right.getQuantity(), left, right);
             
             heap.insert(tree);
 
@@ -95,20 +75,18 @@ public class Compressor {
 
     // Criação da tabela
     public void createTable() throws IOException {
-        
-        String bit[] = TBinary.LBinary(tree, key);
+
+        String bit[] = returningBynary(tree, key);
 
         FileWriter encodedTable = new FileWriter(dictionary);
-        tableSize = 0;
+
         for (int i = 0; i < bit.length;) {
-            encodedTable.write(String.valueOf((char) 351)+(char) Integer.parseInt(bit[i]) + String.valueOf((char) 351) + bit[i + 1] + String.valueOf((char) 351));
+            encodedTable.write((char) Integer.parseInt(bit[i]) + String.valueOf((char) 351) + bit[i + 1] + String.valueOf((char)351));
             binary.put((char) Integer.parseInt(bit[i]), bit[i + 1]);
             i += 2;
         }
         encodedTable.close();
-        FileInputStream table = new FileInputStream(dictionary);
-        tableSize = table.readAllBytes().length;
-        table.close();
+
 
     }
 
@@ -142,17 +120,6 @@ public class Compressor {
 
         }
 
-        for (int j = 0; j < binary.get((char) 350).length(); j++) {
-            if (binary.get((char) 350).charAt(j) == '1') {
-
-                bitSet.set(cont);
-            } 
-            else {
-
-                bitSet.set(cont, false);
-            }
-            cont += 1;
-        }
 
         int rest = 0;
 
@@ -174,26 +141,22 @@ public class Compressor {
         }
     }
 
-    public static String[] LBinary(Node no, boolean key) {
-        if(key == true){
-            tableCode = LBinary(no, "");
+    public static String[] returningBynary(Node no, boolean key) {
+
+            tableCode = returningBynary(no, "");
             return tableCode.split(" ");
-        }
-        else {
-            tableCode += "350"+" 1";
-            return tableCode.split(" ");
-        }
+
 
     }
 
-    private static String LBinary(Node no, String codigo) {
+    private static String returningBynary(Node no, String codigo) {
         if (no.getLeft() == no.getRight()) {
-            tableCode+= no.getValue().getCharacter() + " " + codigo + " " ;
+            tableCode+= no.getCharacter() + " " + codigo + " " ;
             return tableCode;
         }
         else {
-            LBinary(no.getRight(), codigo + "1");
-            LBinary(no.getLeft(), codigo + "0");
+            returningBynary(no.getRight(), codigo + "1");
+            returningBynary(no.getLeft(), codigo + "0");
         }
         return tableCode;
 

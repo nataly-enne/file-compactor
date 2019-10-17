@@ -1,9 +1,6 @@
-package br.com.imd.edb2.nataly.heap;
-
-
-import br.com.imd.edb2.nataly.tree.Node;
-
+package br.com.imd.edb2.nataly.datesStructure;
 import java.util.Arrays;
+
 
 public class Heap {
     private Node[] node;
